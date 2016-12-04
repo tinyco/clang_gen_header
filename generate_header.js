@@ -1,7 +1,7 @@
 const fs = require('fs')
 let error = i => i && console.log(JSON.stringify(i, null, 4))
 let init = filename => fs.writeFile (filename, '' , err => error(err))
-let write = (filename,str) => fs.appendFile(filename, str ? str + '\n' : '' , err => error(err))
+let write = (filename, str) => fs.appendFile(filename, str ? str + '\n' : '' , err => error(err)) + '\n'
 
 if (process.argv.length < 3) {
   console.log('Error: illegal argument.')
@@ -12,29 +12,31 @@ if (process.argv.length < 3) {
       if(err) {
         error(err)
       } else {
+        let str = "";
         let h_file = c_file.replace(/.c$/,'.gen.h')
-        init(h_file)
         const flag = c_file.toUpperCase().replace(/[\/\.]/g,'_')
-        write(h_file, '//This file is auto-generated from ' + c_file)
-        write(h_file, '#ifndef ' + flag)
-        write(h_file, '#define ' + flag)
+        str = str + '//This file is auto-generated from ' + c_file + '\n'
+        str = str + '#ifndef ' + flag + '\n'
+        str = str + '#define ' + flag + '\n'
 
-        write(h_file, '//EXPORT')
+        str = str + '//EXPORT' + '\n'
         sorce_code
           .split('/*')
           .map(i => i.split('*/')[0])
           .filter(i => i.indexOf('EXPORT') === 0)
           .map(i => i.replace('EXPORT\n',''))
-          .map(i => write(h_file, i))
+          .map(i => str = str + i + '\n')
 
-        write(h_file, '//PUBLIC')
+        str = str + '//PUBLIC' + '\n'
         sorce_code
           .split('\n')
           .filter(i => i.indexOf('//PUBLIC') !== -1)
           .map(i => i.replace('//PUBLIC',''))
-          .map(i => write(h_file, i))
+          .map(i => str = str + i + '\n')
 
-        write(h_file, '#endif')
+        str = str + '#endif' + '\n'
+        init(h_file)
+        write(h_file, str)
       }
     })
   })
