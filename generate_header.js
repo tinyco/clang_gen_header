@@ -29,8 +29,11 @@ if (process.argv.length < 3) {
         write(h_file, '//PUBLIC')
         sorce_code
           .split('\n')
-          .filter(i => i.indexOf('//PUBLIC') !== -1)
-          .map(i => i.replace('//PUBLIC',''))
+          .filter(i => {
+            let j = i.split('//')
+            return j.length > 1 && j[1].indexOf('PUBLIC') !== -1
+          })
+          .map(i => i.replace('//','').replace('PUBLIC',''))
           .map(i => write(h_file, i))
 
         write(h_file, '#endif')
